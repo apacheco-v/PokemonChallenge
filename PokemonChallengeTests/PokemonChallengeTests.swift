@@ -11,7 +11,7 @@ import Testing
 struct PokemonChallengeTests {
 
     @Test func example() async throws {
-        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
+        // Escribe tu test aquí usando APIs como `#expect(...)` para verificar condiciones.
     }
 
 }
