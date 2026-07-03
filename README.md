@@ -8,6 +8,19 @@ Assessment técnico — PokéAPI en SwiftUI con Clean Architecture, MVVM y sopor
 
 Aplicación iOS nativa que consume la [PokéAPI](https://pokeapi.co/) para mostrar un listado paginado de Pokémon y su detalle completo (tipos, habilidades, estadísticas, peso, altura y experiencia base). Construida íntegramente con tecnologías nativas de Apple — SwiftUI, SwiftData, URLSession y async/await — **sin ninguna dependencia externa**.
 
+<h2 align="center">📱 App Evidence & UI States</h2>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/3b04b155-8fef-4798-877d-71c1636c6207" width="220" alt="Splash Screen" style="margin: 5px;"/>
+  <img src="https://github.com/user-attachments/assets/a51dbdd7-42e6-43a2-953b-0bb5a5fff250" width="220" alt="Pokémon List Loading" style="margin: 5px;"/>
+  <img src="https://github.com/user-attachments/assets/e0d62668-309c-406f-ac22-b0c6315268e8" width="220" alt="Pokémon List Loaded" style="margin: 5px;"/>
+</p>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/ea776db2-7acb-4353-9116-133f2c2b646d" width="220" alt="Search Filtering" style="margin: 5px;"/>
+  <img src="https://github.com/user-attachments/assets/8c8075a5-fa26-461c-ae57-decf7936b2c7" width="220" alt="Pokémon Detail Spanish" style="margin: 5px;"/>
+</p>
+
 ### Requisitos cumplidos
 
 | Requisito | Estado |
