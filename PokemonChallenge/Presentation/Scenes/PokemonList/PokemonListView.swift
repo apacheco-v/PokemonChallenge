@@ -3,6 +3,7 @@ import SwiftUI
 struct PokemonListView: View {
     @StateObject private var viewModel: PokemonListViewModel
     @State private var path: [PokemonRoute] = []
+    @State private var rawSearchText = ""
     private let getPokemonDetailUseCase: GetPokemonDetailUseCase
 
     init(viewModel: PokemonListViewModel, detailUseCase: GetPokemonDetailUseCase) {
@@ -14,7 +15,10 @@ struct PokemonListView: View {
         NavigationStack(path: $path) {
             rootView
                 .navigationTitle("Pokémon")
-                .searchable(text: $viewModel.searchText, prompt: "Buscar Pokémon...")
+                .searchable(text: $rawSearchText, prompt: "Buscar Pokémon...")
+                .onChange(of: rawSearchText) { _, newValue in
+                    viewModel.setSearchText(newValue)
+                }
                 .navigationDestination(for: PokemonRoute.self) { route in
                     switch route {
                     case .detail(let id, let name):
@@ -42,8 +46,8 @@ struct PokemonListView: View {
         switch viewModel.state {
         case .loading:
             shimmerList
-        case .loaded(let pokemons):
-            listContent(pokemons)
+        case .loaded:
+            listContent()
         case .empty:
             emptyView
         case .error:
@@ -51,11 +55,8 @@ struct PokemonListView: View {
         }
     }
 
-    private func listContent(_ pokemons: [Pokemon]) -> some View {
-        let displayList = viewModel.searchText.isEmpty
-            ? pokemons
-            : pokemons.filter { $0.name.localizedCaseInsensitiveContains(viewModel.searchText) }
-
+    private func listContent() -> some View {
+        let displayList = viewModel.filteredPokemons
         let columns = [GridItem(.flexible(), spacing: 4),
                        GridItem(.flexible(), spacing: 4),
                        GridItem(.flexible(), spacing: 4)]
@@ -63,7 +64,7 @@ struct PokemonListView: View {
         return ScrollView {
             VStack(spacing: 0) {
                 if viewModel.isShowingCachedData {
-                    offlineBanner
+                    OfflineBanner()
                 }
 
                 LazyVGrid(columns: columns, spacing: 4) {
@@ -87,27 +88,6 @@ struct PokemonListView: View {
                                 .padding(.vertical, 16)
                             Spacer()
                         }
-                        .gridCellColumns(3)
-                    }
-
-                    if let error = viewModel.paginationError {
-                        Button {
-                            viewModel.dismissPaginationError()
-                            viewModel.loadNextPage()
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: "exclamationmark.circle")
-                                Text(error)
-                                    .font(.subheadline)
-                                Text("Tocar para reintentar")
-                                    .font(.subheadline.weight(.semibold))
-                            }
-                            .foregroundStyle(.secondary)
-                            .padding(.vertical, 12)
-                            .padding(.horizontal, 16)
-                            .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.plain)
                         .gridCellColumns(3)
                     }
                 }
@@ -145,20 +125,6 @@ struct PokemonListView: View {
             .padding(.horizontal, 8)
             .padding(.top, 16)
         }
-    }
-
-    private var offlineBanner: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "wifi.slash")
-                .font(.subheadline)
-            Text("Mostrando datos sin conexión")
-                .font(.subheadline.weight(.medium))
-        }
-        .foregroundStyle(.white)
-        .padding(.vertical, 10)
-        .padding(.horizontal, 16)
-        .frame(maxWidth: .infinity)
-        .background(.orange)
     }
 
     private var emptyView: some View {

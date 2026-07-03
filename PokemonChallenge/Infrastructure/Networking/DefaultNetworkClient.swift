@@ -1,8 +1,10 @@
 import Foundation
+import OSLog
 
 final class DefaultNetworkClient: NetworkClientProtocol {
     private let session: URLSession
     private let decoder: JSONDecoder
+    private let logger = Logger(subsystem: "com.pokemonchallenge", category: "network")
 
     init(session: URLSession = .shared, decoder: JSONDecoder = .init()) {
         self.session = session
@@ -19,6 +21,33 @@ final class DefaultNetworkClient: NetworkClientProtocol {
     }
 
     func request(_ endpoint: Endpoint) async throws -> Data {
+        let maxRetries = 2
+        var lastError: Error?
+
+        for attempt in 0...maxRetries {
+            do {
+                return try await performRequest(endpoint)
+            } catch let error as NetworkError {
+                switch error {
+                case .timeout, .unknown:
+                    lastError = error
+                    if attempt < maxRetries {
+                        let delay = Double(attempt + 1) * 1.0
+                        logger.notice("Retrying after \(error.localizedDescription) (attempt \(attempt + 1)/\(maxRetries))")
+                        try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                    }
+                default:
+                    throw error
+                }
+            } catch {
+                throw error
+            }
+        }
+
+        throw lastError ?? NetworkError.timeout
+    }
+
+    private func performRequest(_ endpoint: Endpoint) async throws -> Data {
         guard var components = URLComponents(string: endpoint.baseURL + endpoint.path) else {
             throw NetworkError.invalidURL
         }
@@ -67,9 +96,11 @@ final class DefaultNetworkClient: NetworkClientProtocol {
         }
 
         guard (200...299).contains(httpResponse.statusCode) else {
+            logger.warning("HTTP \(httpResponse.statusCode) for \(endpoint.method.rawValue) \(url.absoluteString)")
             throw NetworkError.httpError(statusCode: httpResponse.statusCode, data: data)
         }
 
+        logger.debug("\(endpoint.method.rawValue) \(url.absoluteString) → \(httpResponse.statusCode)")
         return data
     }
 }

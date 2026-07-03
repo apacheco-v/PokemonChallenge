@@ -15,6 +15,7 @@ final class PokemonListViewModel: ObservableObject {
     private var currentOffset = 0
     private var hasMorePages = true
     private var loadTask: Task<Void, Never>?
+    private var searchDebounceTask: Task<Void, Never>?
 
     var filteredPokemons: [Pokemon] {
         if searchText.isEmpty {
@@ -27,6 +28,15 @@ final class PokemonListViewModel: ObservableObject {
 
     init(getPokemonListUseCase: GetPokemonListUseCase) {
         self.getPokemonListUseCase = getPokemonListUseCase
+    }
+
+    func setSearchText(_ text: String) {
+        searchDebounceTask?.cancel()
+        searchDebounceTask = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: 300_000_000)
+            guard !Task.isCancelled else { return }
+            self?.searchText = text
+        }
     }
 
     func loadNextPage() {

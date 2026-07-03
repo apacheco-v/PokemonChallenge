@@ -40,7 +40,10 @@ struct CachedPokemonImage: View {
         }
 
         do {
-            let (data, _) = try await URLSession.shared.data(from: url)
+            let config = URLSessionConfiguration.default
+            config.timeoutIntervalForResource = APIConstants.defaultTimeout
+            let session = URLSession(configuration: config)
+            let (data, _) = try await session.data(from: url)
             ImageCache.shared.set(data: data, for: id)
             uiImage = UIImage(data: data)
         } catch {

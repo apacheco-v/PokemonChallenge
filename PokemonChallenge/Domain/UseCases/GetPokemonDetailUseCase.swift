@@ -8,6 +8,7 @@ struct GetPokemonDetailUseCase {
     }
 
     func execute(id: Int) async throws -> FetchResult<PokemonDetail> {
-        try await repository.fetchPokemonDetail(id: id)
+        guard id > 0 else { throw UseCaseError.invalidOffset }
+        return try await repository.fetchPokemonDetail(id: id)
     }
 }
