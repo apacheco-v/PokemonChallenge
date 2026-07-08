@@ -401,3 +401,4 @@ xcodebuild -project PokemonChallenge.xcodeproj \
 ## Autor
 
 **Alexis Pacheco** — Julio 2026.
+https://teams.microsoft.com/meet/26982093806630?p=5LEsSsypMjOTZgEWjc
